@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>ポモドーロタイマー</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>ポモドーロタイマー</h1>
+    <div class="status">状態: <span id="phase">待機中</span></div>
+    <div class="timer" id="timer">25:00</div>
+    <div class="progress-bar">
+      <div id="progress" class="progress"></div>
+    </div>
+    <button id="startButton" class="idle" onclick="startPomodoro()">スタート</button>
+
+    <div class="youtube-section">
+      <h2>作業用BGM</h2>
+      <input type="text" id="youtubeUrl" placeholder="YouTubeリンクを入力">
+      <button onclick="playAudio()">再生</button>
+      <div id="player" style="display:none;"></div>
+    </div>
+  </div>
+
+  <script>
+    let setCount = 0;
+    let timer;
+    let isWorking = true;
+
+    function startPomodoro() {
+      setCount = 0;
+      runSet();
+    }
+
+    function runSet() {
+      isWorking = true;
+      updatePhase("作業中");
+      startTimer(25 * 60, () => {
+        setCount++;
+        if (setCount < 4) {
+          isWorking = false;
+          updatePhase("休憩中（短）");
+          startTimer(5 * 60, runSet);
+        } else {
+          isWorking = false;
+          updatePhase("休憩中（長）");
+          startTimer(20 * 60, () => {
+            setCount = 0;
+            runSet();
+          });
+        }
+      });
+    }
+
+    function startTimer(seconds, callback) {
+      clearInterval(timer);
+      let remaining = seconds;
+      const total = seconds;
+      updateDisplay(remaining);
+      updateProgressBar(remaining, total);
+
+      timer = setInterval(() => {
+        remaining--;
+        updateDisplay(remaining);
+        updateProgressBar(remaining, total);
+        if (remaining <= 0) {
+          clearInterval(timer);
+          callback();
+        }
+      }, 1000);
+    }
+
+    function updateDisplay(seconds) {
+      const min = Math.floor(seconds / 60);
+      const sec = seconds % 60;
+      document.getElementById("timer").textContent = `${min}:${sec.toString().padStart(2, '0')}`;
+    }
+
+    function updateProgressBar(seconds, total) {
+      const percent = ((total - seconds) / total) * 100;
+      document.getElementById("progress").style.width = `${percent}%`;
+    }
+
+    function updatePhase(text) {
+      document.getElementById("phase").textContent = text;
+      const btn = document.getElementById("startButton");
+
+      if (text === "待機中") {
+        btn.classList.remove("active");
+        btn.classList.add("idle");
+      } else {
+        btn.classList.remove("idle");
+        btn.classList.add("active");
+      }
+    }
+
+    function playAudio() {
+      const url = document.getElementById("youtubeUrl").value;
+      const videoId = extractVideoID(url);
+      if (videoId) {
+        const iframe = document.createElement("iframe");
+        iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&controls=0&showinfo=0&modestbranding=1`;
+        iframe.style.width = "0";
+        iframe.style.height = "0";
+        iframe.style.border = "none";
+        document.getElementById("player").innerHTML = "";
+        document.getElementById("player").appendChild(iframe);
+      }
+    }
+
+    function extractVideoID(url) {
+      const match = url.match(/(?:v=|\/embed\/|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+      return match ? match[1] : null;
+    }
+  </script>
+</body>
+</html>
