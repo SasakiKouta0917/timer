@@ -1,0 +1,87 @@
+body {
+  font-family: "Noto Sans JP", "Yu Gothic UI", sans-serif;
+  background-image: url("/attachments/SsoSrex38op5xzjmtUY5w.jpeg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.container {
+  width: 90%;
+  max-width: 500px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 2em;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  text-align: center;
+}
+
+h1, h2 {
+  color: #5c5c5c;
+}
+
+.status {
+  margin-bottom: 1em;
+  font-size: 1.2em;
+}
+
+.timer {
+  font-size: 3em;
+  margin: 1em 0;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 10px;
+  background-color: #ddd;
+  border-radius: 5px;
+  overflow: hidden;
+  margin-bottom: 2em;
+}
+
+.progress {
+  height: 100%;
+  width: 0%;
+  background-color: #a3c9a8;
+  transition: width 1s linear;
+}
+
+button {
+  display: block;
+  margin: 1em auto;
+  padding: 0.5em 2em;
+  font-size: 1em;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button.idle {
+  background-color: #a3c9a8;
+  color: white;
+}
+
+button.active {
+  background-color: #e07a5f;
+  color: white;
+}
+
+.youtube-section {
+  margin-top: 2em;
+}
+
+input[type="text"] {
+  width: 100%;
+  padding: 0.5em;
+  margin-bottom: 0.5em;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1em;
+}
