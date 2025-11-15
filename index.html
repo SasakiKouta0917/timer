@@ -58,10 +58,15 @@
       transition: width 1s linear;
     }
 
+    .button-group {
+      display: flex;
+      justify-content: center;
+      gap: 1em;
+      margin-bottom: 2em;
+    }
+
     button {
-      display: block;
-      margin: 1em auto;
-      padding: 0.5em 2em;
+      padding: 0.5em 1.5em;
       font-size: 1em;
       border: none;
       border-radius: 6px;
@@ -76,6 +81,11 @@
 
     button.active {
       background-color: #e07a5f;
+      color: white;
+    }
+
+    #restartButton {
+      background-color: #6c91bf;
       color: white;
     }
 
@@ -101,7 +111,10 @@
     <div class="progress-bar">
       <div id="progress" class="progress"></div>
     </div>
-    <button id="startButton" class="idle" onclick="startPomodoro()">スタート</button>
+    <div class="button-group">
+      <button id="startButton" class="idle" onclick="toggleTimer()">スタート</button>
+      <button id="restartButton" onclick="restartPomodoro()">リスタート</button>
+    </div>
 
     <div class="youtube-section">
       <h2>作業用BGM</h2>
@@ -115,10 +128,44 @@
     let setCount = 0;
     let timer;
     let isWorking = true;
+    let isRunning = false;
+    let remainingTime = 0;
+    let currentCallback = null;
 
-    function startPomodoro() {
+    function toggleTimer() {
+      const btn = document.getElementById("startButton");
+      if (isRunning) {
+        clearInterval(timer);
+        isRunning = false;
+        btn.textContent = "スタート";
+        btn.classList.remove("active");
+        btn.classList.add("idle");
+      } else {
+        if (remainingTime > 0 && currentCallback) {
+          startTimer(remainingTime, currentCallback);
+        } else {
+          setCount = 0;
+          runSet();
+        }
+        isRunning = true;
+        btn.textContent = "ストップ";
+        btn.classList.remove("idle");
+        btn.classList.add("active");
+      }
+    }
+
+    function restartPomodoro() {
+      clearInterval(timer);
       setCount = 0;
-      runSet();
+      isRunning = false;
+      remainingTime = 0;
+      currentCallback = null;
+      document.getElementById("startButton").textContent = "スタート";
+      document.getElementById("startButton").classList.remove("active");
+      document.getElementById("startButton").classList.add("idle");
+      updatePhase("待機中");
+      updateDisplay(25 * 60);
+      updateProgressBar(0, 25 * 60);
     }
 
     function runSet() {
@@ -143,17 +190,22 @@
 
     function startTimer(seconds, callback) {
       clearInterval(timer);
-      let remaining = seconds;
+      remainingTime = seconds;
       const total = seconds;
-      updateDisplay(remaining);
-      updateProgressBar(remaining, total);
+      currentCallback = callback;
+      updateDisplay(remainingTime);
+      updateProgressBar(remainingTime, total);
 
       timer = setInterval(() => {
-        remaining--;
-        updateDisplay(remaining);
-        updateProgressBar(remaining, total);
-        if (remaining <= 0) {
+        remainingTime--;
+        updateDisplay(remainingTime);
+        updateProgressBar(remainingTime, total);
+        if (remainingTime <= 0) {
           clearInterval(timer);
+          isRunning = false;
+          document.getElementById("startButton").textContent = "スタート";
+          document.getElementById("startButton").classList.remove("active");
+          document.getElementById("startButton").classList.add("idle");
           callback();
         }
       }, 1000);
@@ -172,15 +224,6 @@
 
     function updatePhase(text) {
       document.getElementById("phase").textContent = text;
-      const btn = document.getElementById("startButton");
-
-      if (text === "待機中") {
-        btn.classList.remove("active");
-        btn.classList.add("idle");
-      } else {
-        btn.classList.remove("idle");
-        btn.classList.add("active");
-      }
     }
 
     function playAudio() {
@@ -189,6 +232,7 @@
       if (videoId) {
         const iframe = document.createElement("iframe");
         iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&controls=0&showinfo=0&modestbranding=1`;
+        iframe.setAttribute("allow", "autoplay");
         iframe.style.width = "0";
         iframe.style.height = "0";
         iframe.style.border = "none";
